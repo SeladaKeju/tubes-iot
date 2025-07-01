@@ -1,123 +1,217 @@
 import 'package:flutter/material.dart';
-import 'joystick_widget.dart';
 
 class CarControlWidget extends StatelessWidget {
-  final Function(double x, double y) onJoystickChanged;
-  final double currentX;
-  final double currentY;
+  final void Function(String action) onAction;
 
   const CarControlWidget({
     super.key,
-    required this.onJoystickChanged,
-    required this.currentX,
-    required this.currentY,
+    required this.onAction,
   });
-
-  String _getDirectionText(double x, double y) {
-    if (x.abs() < 0.1 && y.abs() < 0.1) return 'STOP';
-    
-    String direction = '';
-    if (y > 0.3) direction += 'FORWARD';
-    else if (y < -0.3) direction += 'BACKWARD';
-    
-    if (x > 0.3) direction += direction.isEmpty ? 'RIGHT' : ' RIGHT';
-    else if (x < -0.3) direction += direction.isEmpty ? 'LEFT' : ' LEFT';
-    
-    return direction.isEmpty ? 'STOP' : direction;
-  }
-
-  Color _getDirectionColor(double x, double y) {
-    if (x.abs() < 0.1 && y.abs() < 0.1) return Colors.grey;
-    if (y > 0.3) return Colors.green;
-    if (y < -0.3) return Colors.red;
-    return Colors.orange;
-  }
 
   @override
   Widget build(BuildContext context) {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-    
-    return Column(
-      children: [
-        // Title
-        Text(
-          'Car Controller',
-          style: TextStyle(
-            fontSize: isLandscape ? 16 : 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.indigo,
-          ),
-        ),
-        
-        SizedBox(height: isLandscape ? 8 : 16),
-        
-        // Direction Display
-        Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: isLandscape ? 12 : 16,
-            vertical: isLandscape ? 6 : 8,
-          ),
-          decoration: BoxDecoration(
-            color: _getDirectionColor(currentX, currentY).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: _getDirectionColor(currentX, currentY).withOpacity(0.3),
+    final screenSize = MediaQuery.of(context).size;
+
+    if (isLandscape) {
+      // Landscape - D-Pad dengan ukuran yang disesuaikan
+      final buttonSize = (screenSize.height * 0.15).clamp(30.0, 50.0);
+      final iconSize = (buttonSize * 0.5).clamp(16.0, 24.0);
+      final spacing = (buttonSize * 0.3).clamp(8.0, 16.0);
+
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // MAJU
+            ElevatedButton(
+              onPressed: () => onAction('forward'),
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: EdgeInsets.all(buttonSize * 0.3),
+                backgroundColor: Colors.green,
+                minimumSize: Size(buttonSize, buttonSize),
+              ),
+              child: Icon(
+                Icons.arrow_upward,
+                color: Colors.white,
+                size: iconSize,
+              ),
             ),
-          ),
-          child: Text(
-            _getDirectionText(currentX, currentY),
+            SizedBox(height: spacing),
+            // Baris tengah: KIRI, STOP, KANAN
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: () => onAction('left'),
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: EdgeInsets.all(buttonSize * 0.3),
+                    backgroundColor: Colors.orange,
+                    minimumSize: Size(buttonSize, buttonSize),
+                  ),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: iconSize,
+                  ),
+                ),
+                SizedBox(width: spacing),
+                ElevatedButton(
+                  onPressed: () => onAction('stop'),
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: EdgeInsets.all(buttonSize * 0.3),
+                    backgroundColor: Colors.red,
+                    minimumSize: Size(buttonSize, buttonSize),
+                  ),
+                  child: Icon(
+                    Icons.stop,
+                    color: Colors.white,
+                    size: iconSize,
+                  ),
+                ),
+                SizedBox(width: spacing),
+                ElevatedButton(
+                  onPressed: () => onAction('right'),
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: EdgeInsets.all(buttonSize * 0.3),
+                    backgroundColor: Colors.orange,
+                    minimumSize: Size(buttonSize, buttonSize),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white,
+                    size: iconSize,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: spacing),
+            // MUNDUR
+            ElevatedButton(
+              onPressed: () => onAction('back'),
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: EdgeInsets.all(buttonSize * 0.3),
+                backgroundColor: Colors.blue,
+                minimumSize: Size(buttonSize, buttonSize),
+              ),
+              child: Icon(
+                Icons.arrow_downward,
+                color: Colors.white,
+                size: iconSize,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Portrait - Layout vertikal
+      final buttonSize = (screenSize.width * 0.15).clamp(40.0, 60.0);
+      final iconSize = (buttonSize * 0.5).clamp(20.0, 30.0);
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Car Controller',
             style: TextStyle(
-              fontSize: isLandscape ? 12 : 16,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: _getDirectionColor(currentX, currentY),
+              color: Colors.indigo,
             ),
           ),
-        ),
-        
-        SizedBox(height: isLandscape ? 12 : 20),
-        
-        // Joystick
-        JoystickWidget(
-          size: isLandscape ? 120 : 180,
-          onChanged: onJoystickChanged,
-          backgroundColor: Colors.indigo,
-          knobColor: Colors.indigo[700]!,
-          borderColor: Colors.indigo[800]!,
-        ),
-        
-        SizedBox(height: isLandscape ? 8 : 16),
-        
-        // Coordinates Display
-        Container(
-          padding: EdgeInsets.all(isLandscape ? 6 : 8),
-          decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(6),
+          const SizedBox(height: 16),
+          // MAJU
+          ElevatedButton(
+            onPressed: () => onAction('forward'),
+            style: ElevatedButton.styleFrom(
+              shape: const CircleBorder(),
+              padding: EdgeInsets.all(buttonSize * 0.3),
+              backgroundColor: Colors.green,
+              minimumSize: Size(buttonSize, buttonSize),
+            ),
+            child: Icon(
+              Icons.arrow_upward,
+              color: Colors.white,
+              size: iconSize,
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 12),
+          // Baris tengah: KIRI, STOP, KANAN
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text(
-                'X: ${currentX.toStringAsFixed(2)}',
-                style: TextStyle(
-                  fontSize: isLandscape ? 10 : 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.indigo,
+              ElevatedButton(
+                onPressed: () => onAction('left'),
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: EdgeInsets.all(buttonSize * 0.3),
+                  backgroundColor: Colors.orange,
+                  minimumSize: Size(buttonSize, buttonSize),
+                ),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: iconSize,
                 ),
               ),
-              SizedBox(width: isLandscape ? 8 : 12),
-              Text(
-                'Y: ${currentY.toStringAsFixed(2)}',
-                style: TextStyle(
-                  fontSize: isLandscape ? 10 : 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.indigo,
+              ElevatedButton(
+                onPressed: () => onAction('stop'),
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: EdgeInsets.all(buttonSize * 0.3),
+                  backgroundColor: Colors.red,
+                  minimumSize: Size(buttonSize, buttonSize),
+                ),
+                child: Icon(
+                  Icons.stop,
+                  color: Colors.white,
+                  size: iconSize,
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => onAction('right'),
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: EdgeInsets.all(buttonSize * 0.3),
+                  backgroundColor: Colors.orange,
+                  minimumSize: Size(buttonSize, buttonSize),
+                ),
+                child: Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white,
+                  size: iconSize,
                 ),
               ),
             ],
           ),
-        ),
-      ],
-    );
+          const SizedBox(height: 12),
+          // MUNDUR
+          ElevatedButton(
+            onPressed: () => onAction('back'),
+            style: ElevatedButton.styleFrom(
+              shape: const CircleBorder(),
+              padding: EdgeInsets.all(buttonSize * 0.3),
+              backgroundColor: Colors.blue,
+              minimumSize: Size(buttonSize, buttonSize),
+            ),
+            child: Icon(
+              Icons.arrow_downward,
+              color: Colors.white,
+              size: iconSize,
+            ),
+          ),
+        ],
+      );
+    }
   }
 }
+
+// Usage example
+// CarControlWidget(
+//   onAction: _sendCarAction,
+// ),

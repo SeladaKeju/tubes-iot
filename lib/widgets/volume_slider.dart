@@ -18,38 +18,45 @@ class VolumeSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    
     return Center(
-      child: RotatedBox(
-        quarterTurns: 3,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.height * 0.5,
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 20,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 20),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 30),
-              activeTrackColor: Colors.blue,
-              inactiveTrackColor: Colors.grey[300],
-              thumbColor: Colors.blue[700],
-              overlayColor: Colors.blue.withOpacity(0.2),
-              valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
-              valueIndicatorColor: Colors.blue[700],
-              valueIndicatorTextStyle: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-              showValueIndicator: ShowValueIndicator.always,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: isLandscape ? 16 : 18,
+            thumbShape: RoundSliderThumbShape(
+              enabledThumbRadius: isLandscape ? 16 : 18,
             ),
-            child: Slider(
-              value: value,
-              min: min,
-              max: max,
-              divisions: (max - min).toInt(),
-              label: '${value.toInt()}°',
-              onChanged: onChanged,
-              onChangeEnd: onChangeEnd,
+            overlayShape: RoundSliderOverlayShape(
+              overlayRadius: isLandscape ? 24 : 28,
             ),
+            activeTrackColor: Colors.blue[600],
+            inactiveTrackColor: Colors.grey[300],
+            thumbColor: Colors.blue[700],
+            overlayColor: Colors.blue.withOpacity(0.2),
+            valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+            valueIndicatorColor: Colors.blue[700],
+            valueIndicatorTextStyle: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: isLandscape ? 12 : 14,
+            ),
+            showValueIndicator: ShowValueIndicator.always,
+            tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 3),
+            activeTickMarkColor: Colors.blue[400],
+            inactiveTickMarkColor: Colors.grey[400],
+          ),
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            divisions: (max - min).toInt(),
+            label: '${value.toInt()}°',
+            onChanged: onChanged,
+            onChangeEnd: onChangeEnd,
           ),
         ),
       ),
